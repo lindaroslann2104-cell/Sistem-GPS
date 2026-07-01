@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Info Laluan & Hentian Bas</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px 15px;
+        }
+
+        /* --- BUTANG KEMBALI KE LAMAN UTAMA (RESPONSIF) --- */
+        .back-home-container {
+            margin-bottom: 20px;
+        }
+        .back-home {
+            display: inline-flex;
+            align-items: center;
+            background: #ffffff;
+            color: #333;
+            text-decoration: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+        .back-home:hover {
+            background: #f1f5f9;
+            transform: translateY(-2px);
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+        .header-section h1 {
+            color: #007bff;
+            margin: 10px 0 5px 0;
+            font-size: 28px;
+        }
+        .header-section p {
+            margin: 0;
+            color: #666;
+            font-size: 15px;
+        }
+
+        /* --- SUSUNAN KAD LALUAN --- */
+        .route-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+            border-left: 6px solid #ccc;
+        }
+
+        /* Warna identiti bas */
+        .route-card.bas-a { border-left-color: #007bff; }
+        .route-card.bas-b { border-left-color: #28a745; }
+        .route-card.bas-c { border-left-color: #dc3545; }
+        .route-card.bas-d { border-left-color: #6f42c1; }
+        .route-card.bas-e { border-left-color: #fd7e14; }
+        .route-card.bas-f { border-left-color: #e83e8c; }
+        .route-card.bas-g { border-left-color: #343a40; }
+
+        .bus-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0 0 5px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .bus-meta {
+            font-size: 13px;
+            color: #777;
+            margin-bottom: 20px;
+        }
+
+        /* --- TIMELINE / STEPS STYLE --- */
+        .timeline {
+            position: relative;
+            padding-left: 25px;
+            list-style: none;
+            margin: 0;
+        }
+
+        /* Garis menegak */
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 10px;
+            bottom: 10px;
+            width: 2px;
+            background: #e2e8f0;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 15px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Bulatan checkpoint asas */
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -24px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #cbd5e1;
+            border: 2px solid #fff;
+            box-shadow: 0 0 0 2px #cbd5e1;
+            z-index: 2;
+        }
+
+        /* Warna point ikut bas */
+        .bas-a .timeline-item::before { background: #007bff; box-shadow: 0 0 0 2px #007bff; }
+        .bas-b .timeline-item::before { background: #28a745; box-shadow: 0 0 0 2px #28a745; }
+        .bas-c .timeline-item::before { background: #dc3545; box-shadow: 0 0 0 2px #dc3545; }
+        .bas-d .timeline-item::before { background: #6f42c1; box-shadow: 0 0 0 2px #6f42c1; }
+        .bas-e .timeline-item::before { background: #fd7e14; box-shadow: 0 0 0 2px #fd7e14; }
+        .bas-f .timeline-item::before { background: #e83e8c; box-shadow: 0 0 0 2px #e83e8c; }
+        .bas-g .timeline-item::before { background: #343a40; box-shadow: 0 0 0 2px #343a40; }
+
+        .hentian-nama {
+            display: inline-block;
+            background: #f8fafc;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Label Mula & Tamat */
+        .badge-status {
+            font-size: 10px;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 4px;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .start-badge { background-color: #28a745; }
+        .end-badge { background-color: #dc3545; }
+
+        /* --- MEDIA QUERY UNTUK PHONE KECIL --- */
+        @media screen and (max-width: 480px) {
+            .header-section h1 { font-size: 24px; }
+            .bus-title { font-size: 16px; }
+            .hentian-nama { font-size: 13px; padding: 5px 10px; }
+            .route-card { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Butang Kembali Ke Laman Utama -->
+        <div class="back-home-container">
+            <a href="Home.html" class="back-home">🏠 Laman Utama</a>
+        </div>
+
+        <!-- Seksyen Tajuk Atas -->
+        <div class="header-section">
+            <div style="font-size: 45px; margin-bottom: 5px;">🗺️</div>
+            <h1>Info Laluan & Hentian Bas</h1>
+            <p>Info terperinci mengenai urutan hentian bas kampus.</p>
+        </div>
+
+        <!-- ================= KAD LALUAN BAS A ================= -->
+        <div class="route-card bas-a">
+            <div class="bus-title">🐨 BAS-A (Geng Koala)</div>
+            <div class="bus-meta">Jumlah Checkpoint: 6 Hentian</div>
+            
+            <ul class="timeline">
+                <li class="timeline-item"><span class="hentian-nama">Hentian Padang Kawad</span><span class="badge-status start-badge">Mula</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Seroja</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian FSKM</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian DC</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian PK</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Anggerik</span><span class="badge-status end-badge">Tamat</span></li>
+            </ul>
+        </div>
+
+        <!-- ================= KAD LALUAN BAS B ================= -->
+        <div class="route-card bas-b">
+            <div class="bus-title">🐼 BAS-B (Geng Panda)</div>
+            <div class="bus-meta">Jumlah Checkpoint: 5 Hentian</div>
+            
+            <ul class="timeline">
+                <li class="timeline-item"><span class="hentian-nama">Hentian DC</span><span class="badge-status start-badge">Mula</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian PK</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Padang Kawad</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Seroja</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian FSKM</span><span class="badge-status end-badge">Tamat</span></li>
+            </ul>
+        </div>
+
+        <!-- ================= KAD LALUAN BAS C ================= -->
+        <div class="route-card bas-c">
+            <div class="bus-title">🐹 BAS-C (Geng Capybara)</div>
+            <div class="bus-meta">Jumlah Checkpoint: 13 Hentian</div>
+            
+            <ul class="timeline">
+                <li class="timeline-item"><span class="hentian-nama">Hentian P. Komersial</span><span class="badge-status start-badge">Mula</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian LRT</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian PKNS</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Masjid Seksyen 7</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Pakli</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Pangsapuri Nilam</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Hospital</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Anggerik</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Cempaka</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Seroja</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian FSKM</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian DC</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian PK</span><span class="badge-status end-badge">Tamat</span></li>
+            </ul>
+        </div>
+
+        <!-- ================= KAD LALUAN BAS D ================= -->
+        <div class="route-card bas-d">
+            <div class="bus-title">🐱 BAS-D (Geng Cat)</div>
+            <div class="bus-meta">Jumlah Checkpoint: 8 Hentian</div>
+            
+            <ul class="timeline">
+                <li class="timeline-item"><span class="hentian-nama">Hentian Seksyen 2</span><span class="badge-status start-badge">Mula</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian FSKM</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian DC</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian PK</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Anggerik</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Cempaka</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Seroja</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Baiduri</span><span class="badge-status end-badge">Tamat</span></li>
+            </ul>
+        </div>
+
+        <!-- ================= KAD LALUAN BAS E ================= -->
+        <div class="route-card bas-e">
+            <div class="bus-title">🐰 BAS-E (Geng Rabbit)</div>
+            <div class="bus-meta">Jumlah Checkpoint: 6 Hentian</div>
+            
+            <ul class="timeline">
+                <li class="timeline-item"><span class="hentian-nama">Hentian DC</span><span class="badge-status start-badge">Mula</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian PK</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Anggerik</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Cempaka</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Seroja</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian FSKM</span><span class="badge-status end-badge">Tamat</span></li>
+            </ul>
+        </div>
+
+        <!-- ================= KAD LALUAN BAS F ================= -->
+        <div class="route-card bas-f">
+            <div class="bus-title">🐊 BAS-F (Geng Alligator)</div>
+            <div class="bus-meta">Jumlah Checkpoint: 7 Hentian</div>
+            
+            <ul class="timeline">
+                <li class="timeline-item"><span class="hentian-nama">Hentian Palm Garden</span><span class="badge-status start-badge">Mula</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Anggerik</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Cempaka</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Seroja</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian FSKM</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian DC</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian PK</span><span class="badge-status end-badge">Tamat</span></li>
+            </ul>
+        </div>
+
+        <!-- ================= KAD LALUAN BAS G ================= -->
+        <div class="route-card bas-g">
+            <div class="bus-title">🐹 BAS-G (Geng Hamster)</div>
+            <div class="bus-meta">Jumlah Checkpoint: 10 Hentian</div>
+            
+            <ul class="timeline">
+                <li class="timeline-item"><span class="hentian-nama">Hentian Baiduri</span><span class="badge-status start-badge">Mula</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Unisel</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian B.P Seksyen 6</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Seksyen 2</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian FSKM</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian DC</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian PK</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Anggerik</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Cempaka</span></li>
+                <li class="timeline-item"><span class="hentian-nama">Hentian Seroja</span><span class="badge-status end-badge">Tamat</span></li>
+            </ul>
+        </div>
+    </div>
+
+</body>
+</html>

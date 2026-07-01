@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Live Tracking Bas</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, sans-serif; display: flex; flex-direction: column; height: 100vh; }
+        #map { flex: 1; width: 100%; height: 100%; }
+        
+        /* Kotak info asal untuk PC */
+        .info { 
+            padding: 15px; 
+            background: white; 
+            position: absolute; 
+            top: 10px; 
+            left: 55px; 
+            z-index: 1000; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+            min-width: 260px;
+            max-width: 300px;
+            max-height: 85vh;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+        }
+
+        .dashboard-header h3, .dashboard-header h4 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .status-text {
+            margin-top: 5px;
+            margin-left: 35px;
+            font-size: 14px;
+        }
+
+        /* Butang sembunyi list untuk mobile friendly */
+        .toggle-btn {
+            display: none;
+            width: 100%;
+            padding: 8px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        /* --- BUTANG HOME --- */
+        .leaflet-control-home {
+            background: #fff;
+            width: 36px;        
+            height: 36px;        
+            line-height: 36px;   
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            color: #333;
+            font-size: 22px;     
+            border-radius: 4px;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+            cursor: pointer;
+        }
+        .leaflet-control-home:hover {
+            background: #f4f4f4;
+            color: #000;
+        }
+
+        /* --- REKABENTUK KHAS UNTUK PHONE (RESPONSIVE) --- */
+        @media (max-width: 768px) {
+            .info {
+                position: fixed;
+                top: auto;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                max-width: 100%;
+                min-width: 100%;
+                max-height: 40vh; /* Hadkan tinggi dekat phone supaya tak tutup penuh skrin */
+                border-radius: 15px 15px 0 0; /* Lengkung belah atas sahaja */
+                box-sizing: border-box;
+                padding: 12px 20px;
+            }
+
+            .toggle-btn {
+                display: block; /* Tunjukkan butang sorok/buka dekat phone */
+            }
+
+            .status-container {
+                display: none; /* Sembunyikan senarai secara default di mobile untuk jimat ruang */
+                max-height: 30vh;
+                overflow-y: auto;
+            }
+
+            .status-container.active {
+                display: block; /* Papar balik bila butang diketik */
+            }
+            
+            /* Ubah kedudukan kawalan zoom Leaflet supaya tak bertindih dengan kotak bawah */
+            .leaflet-bottom {
+                bottom: 42vh;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="info">
+        <!-- Butang khas untuk skrin phone kecil -->
+        <button class="toggle-btn" id="toggleInfo" onclick="rekaTampilanMobile()">📋 Lihat Status Bas</button>
+        
+        <div class="status-container" id="statusList">
+            <div class="dashboard-header">
+                <img src="Koala.png" width="25" height="25" alt="Koala">
+                <h3>BAS-A (Geng Koala)</h3>
+            </div>
+            <p class="status-text" style="margin-bottom: 10px;">Status: <span id="statusA" style="color: #007bff; font-weight: bold;">Mencari lokasi...</span></p>
+
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+
+            <div class="dashboard-header">
+                <img src="Panda.png" width="25" height="25" alt="Panda">
+                <h4>BAS-B (Geng Panda)</h4>
+            </div>
+            <p class="status-text" style="margin-bottom: 10px;">Status: <span id="statusB" style="color: #007bff; font-weight: bold;">Mencari lokasi...</span></p>
+
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+
+            <div class="dashboard-header">
+                <img src="Capybara.png" width="25" height="25" alt="Capybara">
+                <h4>BAS-C (Geng Capybara)</h4>
+            </div>
+            <p class="status-text" style="margin-bottom: 10px;">Status: <span id="statusC" style="color: #007bff; font-weight: bold;">Mencari lokasi...</span></p>
+
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+
+            <div class="dashboard-header">
+                <img src="Kucing.png" width="25" height="25" alt="Kucing">
+                <h4>BAS-D (Geng Cat)</h4>
+            </div>
+            <p class="status-text" style="margin-bottom: 10px;">Status: <span id="statusD" style="color: #007bff; font-weight: bold;">Mencari lokasi...</span></p>
+
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+
+            <div class="dashboard-header">
+                <img src="Rabbit.png" width="25" height="25" alt="Rabbit">
+                <h4>BAS-E (Geng Rabbit)</h4>
+            </div>
+            <p class="status-text" style="margin-bottom: 10px;">Status: <span id="statusE" style="color: #007bff; font-weight: bold;">Mencari lokasi...</span></p>
+
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+
+            <div class="dashboard-header">
+                <img src="Buaya.png" width="25" height="25" alt="Buaya">
+                <h4>BAS-F (Geng Alligator)</h4>
+            </div>
+            <p class="status-text" style="margin-bottom: 10px;">Status: <span id="statusF" style="color: #007bff; font-weight: bold;">Mencari lokasi...</span></p>
+
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+
+            <div class="dashboard-header">
+                <img src="Hamster.png" width="25" height="25" alt="Hamster">
+                <h4>BAS-G (Geng Hamster)</h4>
+            </div>
+            <p class="status-text" style="margin-bottom: 0;">Status: <span id="statusG" style="color: #007bff; font-weight: bold;">Mencari lokasi...</span></p>
+        </div>
+    </div>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Fungsi untuk buka tutup menu status di phone
+        function rekaTampilanMobile() {
+            var list = document.getElementById("statusList");
+            var btn = document.getElementById("toggleInfo");
+            if (list.classList.contains("active")) {
+                list.classList.remove("active");
+                btn.innerText = "📋 Lihat Status Bas";
+            } else {
+                list.classList.add("active");
+                btn.innerText = "✖ Tutup Status Bas";
+            }
+        }
+
+        // 1. Setup Peta
+        var map = L.map('map').setView([3.0670848, 101.4956032], 15);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // --- KOD BUTANG HOME ---
+        var HomeControl = L.Control.extend({
+            options: { position: 'topleft' }, 
+            onAdd: function (map) {
+                var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+                var button = L.DomUtil.create('a', 'leaflet-control-home', container);
+                button.innerHTML = '🏠';
+                button.href = 'Home.html'; 
+                button.title = 'Kembali ke Laman Utama';
+
+                setTimeout(function() {
+                    var zoomControl = map._controlCorners['topleft'].querySelector('.leaflet-control-zoom');
+                    if (zoomControl) {
+                        zoomControl.parentNode.insertBefore(container, zoomControl);
+                    }
+                }, 0);
+
+                return container;
+            }
+        });
+        map.addControl(new HomeControl());
+
+        // 2. Ikon Bas
+        var koalaIcon = L.icon({ iconUrl: 'Koala.png', iconSize: [40, 40], iconAnchor: [20, 20], popupAnchor: [0, -20] });
+        var pandaIcon = L.icon({ iconUrl: 'Panda.png', iconSize: [40, 40], iconAnchor: [20, 20], popupAnchor: [0, -20] });
+        var capybaraIcon = L.icon({ iconUrl: 'Capybara.png', iconSize: [40, 40], iconAnchor: [20, 20], popupAnchor: [0, -20] });
+        var catIcon = L.icon({ iconUrl: 'Kucing.png', iconSize: [40, 40], iconAnchor: [20, 20], popupAnchor: [0, -20] });
+        var rabbitIcon = L.icon({ iconUrl: 'Rabbit.png', iconSize: [40, 40], iconAnchor: [20, 20], popupAnchor: [0, -20] });
+        var alligatorIcon = L.icon({ iconUrl: 'Buaya.png', iconSize: [40, 40], iconAnchor: [20, 20], popupAnchor: [0, -20] });
+        var hamsterIcon = L.icon({ iconUrl: 'Hamster.png', iconSize: [40, 40], iconAnchor: [20, 20], popupAnchor: [0, -20] });
+
+        // 3. Struktur Laluan Baharu
+        var laluanA = [
+            {koor: [3.0656940077367594, 101.49520983950657], nama: "Hentian Padang Kawad"},
+            {koor: [3.0678474153782003, 101.50576164975499], nama: "Hentian Seroja"},
+            {koor: [3.072588110970155, 101.49976959485544], nama: "Hentian FSKM"},
+            {koor: [3.0707239755718643, 101.49696936864778], nama: "Hentian DC"},
+            {koor: [3.0680549320114516, 101.4931604045829], nama: "Hentian PK"},
+            {koor: [3.066700096408546, 101.49324200844465], nama: "Hentian Anggerik"}
+        ];
+
+        var laluanB = [
+            {koor: [3.0707239755718643, 101.49696936864778], nama: "Hentian DC"},
+            {koor: [3.0680549320114516, 101.4931604045829], nama: "Hentian PK"},
+            {koor: [3.0656940077367594, 101.49520983950657], nama: "Hentian Padang Kawad"},
+            {koor: [3.0678474153782003, 101.50576164975499], nama: "Hentian Seroja"},
+            {koor: [3.072588110970155, 101.49976959485544], nama: "Hentian FSKM"}
+        ];
+
+        var laluanC = [
+            {koor: [3.067381845580919, 101.48971770028993], nama: "Hentian P. Komersial"},
+            {koor: [3.0673756601655495, 101.48703394933287], nama: "Hentian LRT"},
+            {koor: [3.0673275390924823, 101.48339035844513], nama: "Hentian PKNS"},
+            {koor: [3.070911187221979, 101.48169520234232], nama: "Hentian Masjid Seksyen 7"},
+            {koor: [3.0750679897490607, 101.48722055289575], nama: "Hentian PakLi"},
+            {koor: [3.0755340220143865, 101.49014952513083], nama: "Hentian Pagsapuri Nilam"},
+            {koor: [3.0706862052067696, 101.4916569266091], nama: "Hentian Hospital"}, 
+            {koor: [3.066700096408546, 101.49324200844465], nama: "Hentian Anggerik"}, 
+            {koor: [3.067418876876757, 101.50177052276422], nama: "Hentian Cempaka"},
+            {koor: [3.0678474153782003, 101.50576164975499], nama: "Hentian Seroja"},
+            {koor: [3.072588110970155, 101.49976959485544], nama: "Hentian FSKM"},
+            {koor: [3.0707239755718643, 101.49696936864778], nama: "Hentian DC"},
+            {koor: [3.0680549320114516, 101.4931604045829], nama: "Hentian PK"}
+        ];
+
+        var laluanD = [
+            {koor: [3.071930777485203, 101.50753654232832], nama: "Hentian Seksyen 2"},
+            {koor: [3.072588110970155, 101.49976959485544], nama: "Hentian FSKM"},
+            {koor: [3.0707239755718643, 101.49696936864778], nama: "Hentian DC"},
+            {koor: [3.0680549320114516, 101.4931604045829], nama: "Hentian PK"},
+            {koor: [3.066700096408546, 101.49324200844465], nama: "Hentian Anggerik"},
+            {koor: [3.067418876876757, 101.50177052276422], nama: "Hentian Cempaka"},
+            {koor: [3.0678474153782003, 101.50576164975499], nama: "Hentian Seroja"},
+            {koor: [3.07393686335974, 101.50105900753978], nama: "Hentian Baiduri"}
+        ];
+
+        var laluanE = [
+            {koor: [3.0707239755718643, 101.49696936864778], nama: "Hentian DC"},
+            {koor: [3.0680549320114516, 101.4931604045829], nama: "Hentian PK"},
+            {koor: [3.066700096408546, 101.49324200844465], nama: "Hentian Anggerik"},
+            {koor: [3.067418876876757, 101.50177052276422], nama: "Hentian Cempaka"},
+            {koor: [3.0678474153782003, 101.50576164975499], nama: "Hentian Seroja"},
+            {koor: [3.072588110970155, 101.49976959485544], nama: "Hentian FSKM"}
+        ];
+
+        var laluanF = [
+            {koor: [3.0652682957484356, 101.4614526382823], nama: "Hentian Palm Garden"},
+            {koor: [3.066700096408546, 101.49324200844465], nama: "Hentian Anggerik"},
+            {koor: [3.067418876876757, 101.50177052276422], nama: "Hentian Cempaka"},
+            {koor: [3.0678474153782003, 101.50576164975499], nama: "Hentian Seroja"},
+            {koor: [3.072588110970155, 101.49976959485544], nama: "Hentian FSKM"},
+            {koor: [3.0707239755718643, 101.49696936864778], nama: "Hentian DC"},
+            {koor: [3.0680549320114516, 101.4931604045829], nama: "Hentian PK"}
+        ];
+
+        var laluanG = [
+            {koor: [3.07393686335974, 101.50105900753978], nama: "Hentian Baiduri"},
+            {koor: [3.077987866619707, 101.49614210708198], nama: "Hentian Unisel"},
+            {koor: [3.084938392329176, 101.50706735279947], nama: "Hentian B.P Seksyen 6"},
+            {koor: [3.071930777485203, 101.50753654232832], nama: "Hentian Seksyen 2"},
+            {koor: [3.072588110970155, 101.49976959485544], nama: "Hentian FSKM"},
+            {koor: [3.0707239755718643, 101.49696936864778], nama: "Hentian DC"},
+            {koor: [3.0680549320114516, 101.4931604045829], nama: "Hentian PK"},
+            {koor: [3.066700096408546, 101.49324200844465], nama: "Hentian Anggerik"},
+            {koor: [3.067418876876757, 101.50177052276422], nama: "Hentian Cempaka"},
+            {koor: [3.0678474153782003, 101.50576164975499], nama: "Hentian Seroja"}
+        ];
+
+        function ambilKoor(laluan) { return laluan.map(item => item.koor); }
+
+        L.polyline(ambilKoor(laluanA), {color: 'blue', weight: 4, opacity: 0.7}).addTo(map);
+        L.polyline(ambilKoor(laluanB), {color: 'green', weight: 4, opacity: 0.7}).addTo(map);
+        L.polyline(ambilKoor(laluanC), {color: 'red', weight: 4, opacity: 0.7}).addTo(map);
+        L.polyline(ambilKoor(laluanD), {color: 'purple', weight: 4, opacity: 0.7}).addTo(map);
+        L.polyline(ambilKoor(laluanE), {color: 'orange', weight: 4, opacity: 0.7}).addTo(map);
+        L.polyline(ambilKoor(laluanF), {color: 'pink', weight: 4, opacity: 0.7}).addTo(map); 
+        L.polyline(ambilKoor(laluanG), {color: 'black', weight: 4, opacity: 0.7}).addTo(map);
+
+        var indexA = 0, indexB = 0, indexC = 0, indexD = 0, indexE = 0, indexF = 0, indexG = 0;
+
+        var markerA = L.marker(laluanA[indexA].koor, {icon: koalaIcon}).addTo(map).bindPopup("<b>BAS-A</b><br>Geng Koala");
+        var markerB = L.marker(laluanB[indexB].koor, {icon: pandaIcon}).addTo(map).bindPopup("<b>BAS-B</b><br>Geng Panda");
+        var markerC = L.marker(laluanC[indexC].koor, {icon: capybaraIcon}).addTo(map).bindPopup("<b>BAS-C</b><br>Geng Capybara");
+        var markerD = L.marker(laluanD[indexD].koor, {icon: catIcon}).addTo(map).bindPopup("<b>BAS-D</b><br>Geng Cat");
+        var markerE = L.marker(laluanE[indexE].koor, {icon: rabbitIcon}).addTo(map).bindPopup("<b>BAS-E</b><br>Geng Rabbit");
+        var markerF = L.marker(laluanF[indexF].koor, {icon: alligatorIcon}).addTo(map).bindPopup("<b>BAS-F</b><br>Geng Alligator");
+        var markerG = L.marker(laluanG[indexG].koor, {icon: hamsterIcon}).addTo(map).bindPopup("<b>BAS-G</b><br>Geng Hamster");
+
+        document.getElementById("statusA").innerText = laluanA[indexA].nama;
+        document.getElementById("statusB").innerText = laluanB[indexB].nama;
+        document.getElementById("statusC").innerText = laluanC[indexC].nama;
+        document.getElementById("statusD").innerText = laluanD[indexD].nama;
+        document.getElementById("statusE").innerText = laluanE[indexE].nama;
+        document.getElementById("statusF").innerText = laluanF[indexF].nama;
+        document.getElementById("statusG").innerText = laluanG[indexG].nama;
+
+        // Simulasi Pergerakan Bas (Interval kekal sama)
+        setInterval(function() { 
+            indexA = (indexA + 1) % laluanA.length; markerA.setLatLng(laluanA[indexA].koor); 
+            document.getElementById("statusA").innerText = laluanA[indexA].nama;
+        }, 3000);
+        setInterval(function() { 
+            indexB = (indexB + 1) % laluanB.length; markerB.setLatLng(laluanB[indexB].koor); 
+            document.getElementById("statusB").innerText = laluanB[indexB].nama;
+        }, 4000);
+        setInterval(function() { 
+            indexC = (indexC + 1) % laluanC.length; markerC.setLatLng(laluanC[indexC].koor); 
+            document.getElementById("statusC").innerText = laluanC[indexC].nama;
+        }, 5000);
+        setInterval(function() { 
+            indexD = (indexD + 1) % laluanD.length; markerD.setLatLng(laluanD[indexD].koor); 
+            document.getElementById("statusD").innerText = laluanD[indexD].nama;
+        }, 3000);
+        setInterval(function() { 
+            indexE = (indexE + 1) % laluanE.length; markerE.setLatLng(laluanE[indexE].koor); 
+            document.getElementById("statusE").innerText = laluanE[indexE].nama;
+        }, 4000);
+        setInterval(function() { 
+            indexF = (indexF + 1) % laluanF.length; markerF.setLatLng(laluanF[indexF].koor); 
+            document.getElementById("statusF").innerText = laluanF[indexF].nama;
+        }, 3000);
+        setInterval(function() { 
+            indexG = (indexG + 1) % laluanG.length; markerG.setLatLng(laluanG[indexG].koor); 
+            document.getElementById("statusG").innerText = laluanG[indexG].nama;
+        }, 3000);
+    </script>
+</body>
+</html>

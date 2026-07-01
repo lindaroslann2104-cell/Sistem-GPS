@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Bas Pintar - Utama</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px; /* Tambah padding supaya tak rapat tepi skrin phone */
+            background-color: #f4f7f6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh; /* Tukar dari height ke min-height supaya boleh skrol di phone */
+            box-sizing: border-box;
+        }
+        
+        /* Memastikan pengiraan saiz padding tidak lari */
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+
+        .welcome-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;    
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 30px; /* Jarakkan sikit dengan menu bawah */
+        }
+
+        .welcome-logo {
+            width: 130px; /* Kecilkan sikit untuk skrin mobile */
+            height: auto;          
+            margin-bottom: 15px;   
+        }
+
+        .welcome-container h1 {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 24px; /* Saiz standard mobile */
+        }
+
+        .welcome-container p {
+            color: #666;
+            margin-top: 0;
+            font-size: 15px;
+        }
+
+        .menu-grid {
+            display: grid;
+            /* auto-fit akan susun kad ke bawah secara automatik kalau skrin sempit */
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 800px;
+            width: 100%; /* Guna 100% ruang yang ada di dalam padding */
+        }
+
+        .menu-card {
+            background: white;
+            padding: 25px 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            text-decoration: none;
+            color: #333;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            border-color: #007bff;
+        }
+
+        .menu-card .icon {
+            font-size: 35px;
+            margin-bottom: 12px;
+        }
+
+        .menu-card h3 {
+            margin: 0 0 8px 0;
+            color: #007bff;
+            font-size: 18px;
+        }
+
+        .menu-card p {
+            margin: 0;
+            font-size: 14px;
+            color: #777;
+            line-height: 1.4;
+        }
+
+        /* --- Media Query untuk Skrin Phone Khas/Kecil --- */
+        @media (max-width: 480px) {
+            body {
+                justify-content: flex-start; /* Alih ke atas sikit, tak la terapung di tengah sangat */
+                padding: 15px;
+            }
+            .welcome-logo {
+                width: 110px; /* Kecilkan logo lagi sikit kat phone kecil */
+            }
+            .welcome-container h1 {
+                font-size: 20px; /* Kecilkan teks tajuk */
+            }
+            .menu-grid {
+                grid-template-columns: 1fr; /* Paksa 1 kolum penuh ke bawah */
+                gap: 15px;
+            }
+            .menu-card {
+                padding: 20px 15px; /* Kurangkan padding dalam kad */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="welcome-container">
+        <img src="Logo Uitm.png" alt="Logo Bas" class="welcome-logo">
+        <h1>Sistem Pengurusan Bas Kampus</h1>
+        <p>Sila pilih menu di bawah untuk maklumat lanjut</p>
+    </div>
+
+    <div class="menu-grid">
+        <a href="Front.html" class="menu-card">
+            <div class="icon">📍</div>
+            <h3>Live Tracking Bas</h3>
+            <p>Lihat pergerakan semasa semua bas secara masa nyata.</p>
+        </a>
+
+        <a href="JadualMasa.html" class="menu-card">
+            <div class="icon">📅</div>
+            <h3>Jadual Waktu Bas</h3>
+            <p>Semak waktu operasi, masa bertolak, dan jadual harian.</p>
+        </a>
+
+        <a href="laluan.html" class="menu-card">
+            <div class="icon">🗺️</div>
+            <h3>Laluan & Hentian</h3>
+            <p>Info terperinci mengenai setiap check point hentian bas.</p>
+        </a>
+    </div>
+
+</body>
+</html>
